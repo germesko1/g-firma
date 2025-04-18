@@ -213,7 +213,7 @@
                     
                     <p>Nutzen Sie unser kostenloses Beschwerdeformular, um Ihre Erfahrungen zu schildern. Gemeinsam setzen wir uns dafür ein, dass Ihre Stimme gehört und Lösungen gefunden werden — für ein faires Miteinander und den Erhalt unseres kulturellen Erbes.</p>
                     
-                    <a href="/beschwerde" class="button">Jetzt beschweren</a>
+                    <a href="/" class="button">Jetzt beschweren</a>
                 </div>
             </div>
         </main>
