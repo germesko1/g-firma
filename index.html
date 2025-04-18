@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Beschwerdeportal der Gemeinschaft für Fairness und Recht Miteinander Aktiv">
+    <title>G-Firma - Beschwerdeportal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Используем минимальную версию Tailwind для производительности -->
+    <script src="https://cdn.tailwindcss.com?v=3.3.0"></script>
+    <style>
+      :root {
+        --primary-color: #dc3545;
+        --primary-hover: #c82333;
+        --border-color: #cfd8dc;
+        --focus-color: #0077CC;
+      }
+
+      body {
+        font-family: 'Inter', sans-serif;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        overflow-x: hidden;
+        align-items: center;
+      }
+
+      /* Используем CSS-переменные для лучшей поддержки тем */
+      .complaint-button {
+        background-color: var(--primary-color);
+        border: none;
+        color: white;
+        padding: 12px 24px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 18px;
+        margin: 10px 0;
+        cursor: pointer;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        width: fit-content;
+      }
+
+      .complaint-button:hover {
+        background-color: var(--primary-hover);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      }
+
+      .complaint-button:focus {
+        outline: 2px solid var(--focus-color);
+        outline-offset: 2px;
+      }
+
+      .form-input {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 12px;
+        margin-bottom: 16px;
+        width: 100%;
+        font-size: 16px;
+        transition: border-color 0.3s ease;
+        box-sizing: border-box;
+      }
+
+      .form-input:focus {
+        border-color: var(--focus-color);
+        outline: none;
+        box-shadow: 0 1px 3px rgba(0, 119, 204, 0.2);
+      }
+
+      .textarea-input {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 12px;
+        margin-bottom: 16px;
+        width: 100%;
+        font-size: 16px;
+        transition: border-color 0.3s ease;
+        height: 150px;
+        resize: vertical;
+        box-sizing: border-box;
+      }
+
+      .textarea-input:focus {
+        border-color: var(--focus-color);
+        outline: none;
+        box-shadow: 0 1px 3px rgba(0, 119, 204, 0.2);
+      }
+
+      .radio-input:checked::before {
+        content: '';
+        display: block;
+        width: 10px;
+        height: 10px;
+        background-color: var(--focus-color);
+        border-radius: 50%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      .file-upload-button {
+        background-color: #e0e0e0;
+        color: #333;
+        padding: 10px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        margin-top: 10px;
+        display: inline-block;
+        transition: all 0.3s ease;
+        border: 1px solid var(--border-color);
+        text-align: center;
+      }
+
+      .file-upload-button:hover {
+        background-color: #d0d0d0;
+        transform: translateY(-1px);
+      }
+
+      .file-upload-button:focus {
+        outline: 2px solid var(--focus-color);
+        outline-offset: 2px;
+      }
+
+      #file-input {
+        display: none;
+      }
+
+      #file-name {
+        margin-top: 8px;
+        font-size: 14px;
+        color: #555;
+      }
+
+      .header-section {
+        background-color: #f0f0f0;
+        padding: 24px 0;
+        text-align: center;
+        border-bottom: 1px solid #d0d0d0;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        width: 100%;
+      }
+
+      .gray-block {
+        background-color: #f7f7f7;
+        padding: 24px;
+        border-radius: 8px;
+        margin-bottom: 24px;
+        text-align: center;
+        width: 90%;
+        max-width: 800px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      }
+
+      .help-text {
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 4px;
+        margin-bottom: 16px;
+      }
+
+      .error-message {
+        color: var(--primary-color);
+        font-size: 0.85rem;
+        margin-top: -12px;
+        margin-bottom: 12px;
+        display: none;
+      }
+
+      .complaint-image {
+        max-width: 200px;
+        margin: 0 auto 20px auto;
+      }
+
+      strong {
+        font-weight: 700;
+      }
+
+      /* Улучшения для адаптивности */
+      @media (max-width: 640px) {
+        .form-flex-row {
+          flex-direction: column;
+        }
+        
+        .form-flex-row .form-input {
+          width: 100%;
+        }
+      }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+    <div class="container mx-auto max-w-3xl bg-white rounded-lg shadow-md my-6">
+        <header class="header-section">
+            <div class="flex items-center justify-center mb-2">
+                <!-- Простой логотип SVG -->
+                <svg width="40" height="40" viewBox="0 0 40 40" class="mr-3">
+                    <rect width="40" height="40" rx="8" fill="#dc3545"/>
+                    <text x="50%" y="50%" font-size="24" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">G</text>
+                </svg>
+                <h1 class="text-3xl font-bold">G-Firma</h1>
+            </div>
+            <p class="text-gray-600">Gemeinschaft für Fairness und Recht Miteinander Aktiv</p>
+        </header>
+
+        <main>
+            <section class="py-8 px-4 flex flex-col items-center justify-center">
+                <!-- Добавленное изображение урны для голосования -->
+                <div class="complaint-image">
+                    <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Ящик/урна -->
+                        <rect x="75" y="150" width="150" height="100" fill="white" stroke="#333" stroke-width="2"/>
+                        <rect x="65" y="130" width="170" height="25" fill="white" stroke="#333" stroke-width="2"/>
+                        <line x1="80" y1="150" x2="220" y2="150" stroke="#333" stroke-width="2"/>
+                        
+                        <!-- Грустный смайлик на ящике -->
+                        <circle cx="150" cy="200" r="25" fill="white" stroke="#333" stroke-width="1.5"/>
+                        <circle cx="140" cy="195" r="3" fill="#333"/>
+                        <circle cx="160" cy="195" r="3" fill="#333"/>
+                        <path d="M135,215 Q150,205 165,215" fill="none" stroke="#333" stroke-width="2"/>
+                        
+                        <!-- Тень под ящиком -->
+                        <ellipse cx="150" cy="255" rx="75" ry="10" fill="#DDDDDD"/>
+                        
+                        <!-- Красный конверт -->
+                        <path d="M120,60 L200,60 L200,130 L120,130 Z" fill="#d32f2f" stroke="#333" stroke-width="1.5"/>
+                        <path d="M120,60 L160,100 L200,60" fill="none" stroke="#333" stroke-width="1.5"/>
+                        
+                        <!-- Рука, опускающая конверт -->
+                        <path d="M200,60 Q215,45 230,50 Q245,55 245,75 Q245,85 230,90 L210,90" fill="white" stroke="#333" stroke-width="1.5"/>
+                        <path d="M210,90 Q220,93 220,100 L220,120" fill="white" stroke="#333" stroke-width="1.5"/>
+                        <path d="M220,120 Q220,130 210,130" fill="white" stroke="#333" stroke-width="1.5"/>
+                        
+                        <!-- Прорезь в ящике -->
+                        <rect x="105" y="135" width="90" height="5" fill="#333"/>
+                    </svg>
+                </div>
+                
+                <div class="gray-block">
+                    <h2 class="text-2xl font-bold mb-4"><strong>Ihre Beschwerde zählt!</strong></h2>
+                    <p class="mb-6 text-left">
+                        Haben Sie Ungerechtigkeiten in Ihrer Gemeinde erlebt? Probleme mit der Infrastruktur, dem Schutz von Traditionen oder sozialer Benachteiligung? Ob geschlossene Bibliotheken, überteuerte Stromkosten oder Lärmbelästigung — teilen Sie uns Ihr Anliegen mit!
+                    </p>
+                    <p class="mb-6 text-left">
+                        Nutzen Sie unser <strong>kostenloses Beschwerdeformular</strong>, um Ihre Erfahrungen zu schildern. Gemeinsam setzen wir uns dafür ein, dass Ihre Stimme gehört und Lösungen gefunden werden — für ein faires Miteinander und den Erhalt unseres kulturellen Erbes.
+                    </p>
+                    <button id="scroll-button" type="button" class="complaint-button">Jetzt beschweren</button>
+                </div>
+            </section>
+
+            <section id="form-section" class="px-6 py-8 max-w-2xl mx-auto">
+                <form id="complaint-form" class="space-y-6">
+                    <div>
+                        <label for="vorname" class="block text-lg font-semibold mb-2">Name <span class="text-red-600">*</span></label>
+                        <div class="flex space-x-4 form-flex-row">
+                            <div class="w-1/2">
+                                <input type="text" id="vorname" name="vorname" class="form-input" placeholder="Vorname" required aria-required="true">
+                                <p class="error-message" id="vorname-error">Bitte geben Sie Ihren Vornamen ein</p>
+                            </div>
+                            <div class="w-1/2">
+                                <input type="text" id="nachname" name="nachname" class="form-input" placeholder="Nachname" required aria-required="true">
+                                <p class="error-message" id="nachname-error">Bitte geben Sie Ihren Nachnamen ein</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="email" class="block text-lg font-semibold mb-2">E-Mail-Adresse <span class="text-red-600">*</span></label>
+                        <input type="email" id="email" name="email" class="form-input" placeholder="beispiel@domain.de" required aria-required="true">
+                        <p class="error-message" id="email-error">Bitte geben Sie eine gültige E-Mail-Adresse ein</p>
+                    </div>
+
+                    <div>
+                        <label for="bundesland" class="block text-lg font-semibold mb-2">Bundesland <span class="text-red-600">*</span></label>
+                        <select id="bundesland" name="bundesland" class="form-input" required aria-required="true">
+                            <option value="">- Bitte auswählen -</option>
+                            <option value="bw">Baden-Württemberg</option>
+                            <option value="by">Bayern</option>
+                            <option value="be">Berlin</option>
+                            <option value="bb">Brandenburg</option>
+                            <option value="hb">Bremen</option>
+                            <option value="hh">Hamburg</option>
+                            <option value="he">Hessen</option>
+                            <option value="mv">Mecklenburg-Vorpommern</option>
+                            <option value="ni">Niedersachsen</option>
+                            <option value="nw">Nordrhein-Westfalen</option>
+                            <option value="rp">Rheinland-Pfalz</option>
+                            <option value="sl">Saarland</option>
+                            <option value="sn">Sachsen</option>
+                            <option value="st">Sachsen-Anhalt</option>
+                            <option value="sh">Schleswig-Holstein</option>
+                            <option value="th">Thüringen</option>
+                        </select>
+                        <p class="error-message" id="bundesland-error">Bitte wählen Sie Ihr Bundesland aus</p>
+                    </div>
+
+                    <div>
+                        <label for="betreff" class="block text-lg font-semibold mb-2">Betreff <span class="text-red-600">*</span></label>
+                        <input type="text" id="betreff" name="betreff" class="form-input" placeholder="Kurze Beschreibung des Problems" required aria-required="true">
+                        <p class="help-text">Sie können uns hier gerne den genauen Namen eines Anbieters, Unternehmens oder Produkts nennen</p>
+                        <p class="error-message" id="betreff-error">Bitte geben Sie einen Betreff ein</p>
+                    </div>
+
+                    <div>
+                        <label for="anliegen" class="block text-lg font-semibold mb-2">Ihr Anliegen <span class="text-red-600">*</span></label>
+                        <textarea id="anliegen" name="anliegen" class="textarea-input" placeholder="Bitte beschreiben Sie Ihr Anliegen detailliert" required aria-required="true"></textarea>
+                        <p class="error-message" id="anliegen-error">Bitte beschreiben Sie Ihr Anliegen</p>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center mb-4">
+                            <input type="checkbox" id="dokumente" name="dokumente" class="w-5 h-5 mr-3">
+                            <label for="dokumente" class="text-lg">Ich möchte auch Dokumente übermitteln</label>
+                        </div>
+
+                        <div id="dokumente-section" class="mt-4 hidden">
+                            <label for="file-input" class="block text-lg font-semibold mb-2">Dokumente/Fotos hinzufügen:</label>
+                            <p class="help-text">
+                                Bitte laden Sie Dokumente hoch, die zur Bearbeitung Ihres Hinweises hilfreich sind (z.B. Verträge, Rechnungen).<br>
+                                Erlaubt sind bis zu 3 Dateien, maximale Gesamtgröße: 10 MB.<br>
+                                Erlaubte Dateitypen: JPG, JPEG, PNG, PDF
+                            </p>
+                            <input type="file" id="file-input" name="file" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" multiple>
+                            <label for="file-input" class="file-upload-button">Dateien auswählen</label>
+                            <div id="file-name" class="mt-2">Keine Datei ausgewählt</div>
+                            <div id="file-error" class="error-message">Bitte wählen Sie gültige Dateien aus</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <div class="flex items-center mb-4">
+                            <input type="checkbox" id="datenschutz" name="datenschutz" class="w-5 h-5 mr-3" required aria-required="true">
+                            <label for="datenschutz" class="text-base">
+                                Ich stimme der <a href="#" class="text-blue-600 hover:underline">Datenschutzerklärung</a> zu <span class="text-red-600">*</span>
+                            </label>
+                        </div>
+                        <p class="error-message" id="datenschutz-error">Bitte stimmen Sie der Datenschutzerklärung zu</p>
+                    </div>
+
+                    <button type="submit" class="complaint-button w-full mx-auto">Beschwerde einreichen</button>
+                    <p class="text-sm text-gray-600 mt-2 text-center"><span class="text-red-600">*</span> Pflichtfelder</p>
+                </form>
+            </section>
+        </main>
+
+        <footer class="bg-gray-100 p-6 text-center rounded-b-lg">
+            <p class="mb-2">&copy; 2024 G-Firma. Alle Rechte vorbehalten.</p>
+            <div class="flex justify-center space-x-4">
+                <a href="#" class="text-blue-600 hover:underline">Impressum</a>
+                <span class="text-gray-400">|</span>
+                <a href="#" class="text-blue-600 hover:underline">Datenschutz</a>
+                <span class="text-gray-400">|</span>
+                <a href="#" class="text-blue-600 hover:underline">Kontakt</a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.getElementById('file-input');
+        const fileNameDisplay = document.getElementById('file-name');
+        const fileError = document.getElementById('file-error');
+        const scrollButton = document.getElementById('scroll-button');
+        const formSection = document.getElementById('form-section');
+        const dokumenteCheckbox = document.getElementById('dokumente');
+        const dokumenteSection = document.getElementById('dokumente-section');
+        
+        // Показать/скрыть раздел с файлами
+        dokumenteCheckbox.addEventListener('change', function() {
+          if (this.checked) {
+            dokumenteSection.classList.remove('hidden');
+          } else {
+            dokumenteSection.classList.add('hidden');
+            fileInput.value = '';
+            fileNameDisplay.textContent = 'Keine Datei ausgewählt';
+            fileError.style.display = 'none';
+          }
+        });
+
+        // Обработка загрузки файлов
+        fileInput.addEventListener('change', function() {
+          if (this.files && this.files.length > 0) {
+            if (this.files.length > 3) {
+              fileError.textContent = 'Sie können maximal 3 Dateien hochladen';
+              fileError.style.display = 'block';
+              this.value = '';
+              fileNameDisplay.textContent = 'Keine Datei ausgewählt';
+              return;
+            }
+            
+            let totalSize = 0;
+            let invalidFiles = [];
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+            
+            for (let i = 0; i < this.files.length; i++) {
+              totalSize += this.files[i].size;
+              if (!validTypes.includes(this.files[i].type)) {
+                invalidFiles.push(this.files[i].name);
+              }
+            }
+            
+            if (invalidFiles.length > 0) {
+              fileError.textContent = `Ungültige Dateitypen: ${invalidFiles.join(', ')}`;
+              fileError.style.display = 'block';
+              this.value = '';
+              fileNameDisplay.textContent = 'Keine Datei ausgewählt';
+              return;
+            }
+            
+            if (totalSize > 10 * 1024 * 1024) { // 10MB in bytes
+              fileError.textContent = 'Die Gesamtgröße der Dateien überschreitet 10 MB';
+              fileError.style.display = 'block';
+              this.value = '';
+              fileNameDisplay.textContent = 'Keine Datei ausgewählt';
+              return;
+            }
+            
+            let fileNames = Array.from(this.files).map(file => file.name).join(', ');
+            fileNameDisplay.textContent = 'Ausgewählte Dateien: ' + fileNames;
+            fileError.style.display = 'none';
+          } else {
+            fileNameDisplay.textContent = 'Keine Datei ausgewählt';
+          }
+        });
+
+        // Прокрутка к форме
+        scrollButton.addEventListener('click', function() {
+          formSection.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Валидация формы
+        const form = document.getElementById('complaint-form');
+        const errorMessages = document.querySelectorAll('.error-message');
+        
+        function validateEmail(email) {
+          const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          return re.test(email);
+        }
+        
+        function showError(field, message) {
+          const errorElement = document.getElementById(`${field}-error`);
+          errorElement.textContent = message;
+          errorElement.style.display = 'block';
+          document.getElementById(field).classList.add('border-red-500');
+          return false;
+        }
+        
+        function clearErrors() {
+          errorMessages.forEach(error => {
+            error.style.display = 'none';
+          });
+          form.querySelectorAll('input, select, textarea').forEach(field => {
+            field.classList.remove('border-red-500');
+          });
+        }
+
+        form.addEventListener('submit', function(event) {
+          event.preventDefault();
+          clearErrors();
+          
+          let isValid = true;
+          
+          // Валидация полей формы
+          const vorname = document.getElementById('vorname').value.trim();
+          const nachname = document.getElementById('nachname').value.trim();
+          const email = document.getElementById('email').value.trim();
+          const bundesland = document.getElementById('bundesland').value;
+          const betreff = document.getElementById('betreff').value.trim();
+          const anliegen = document.getElementById('anliegen').value.trim();
+          const datenschutz = document.getElementById('datenschutz').checked;
+          
+          if (!vorname) {
+            isValid = showError('vorname', 'Bitte geben Sie Ihren Vornamen ein');
+          }
+          
+          if (!nachname) {
+            isValid = showError('nachname', 'Bitte geben Sie Ihren Nachnamen ein');
+          }
+          
+          if (!email) {
+            isValid = showError('email', 'Bitte geben Sie Ihre E-Mail-Adresse ein');
+          } else if (!validateEmail(email)) {
+            isValid = showError('email', 'Bitte geben Sie eine gültige E-Mail-Adresse ein');
+          }
+          
+          if (!bundesland) {
+            isValid = showError('bundesland', 'Bitte wählen Sie Ihr Bundesland aus');
+          }
+          
+          if (!betreff) {
+            isValid = showError('betreff', 'Bitte geben Sie einen Betreff ein');
+          }
+          
+          if (!anliegen) {
+            isValid = showError('anliegen', 'Bitte beschreiben Sie Ihr Anliegen');
+          }
+          
+          if (!datenschutz) {
+            isValid = showError('datenschutz', 'Bitte stimmen Sie der Datenschutzerklärung zu');
+          }
+          
+          // Если форма прошла валидацию
+          if (isValid) {
+            // В реальном приложении здесь был бы AJAX-запрос к серверу
+            
+            // Создаем модальное окно подтверждения вместо alert
+            const modal = document.createElement('div');
+            modal.innerHTML = `
+              <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" id="success-modal">
+                <div class="bg-white p-8 rounded-lg shadow-lg max-w-md mx-4">
+                  <h3 class="text-xl font-bold text-green-600 mb-4">Erfolgreich eingereicht!</h3>
+                  <p class="mb-6">Ihre Beschwerde wurde erfolgreich eingereicht. Wir werden uns so schnell wie möglich mit Ihnen in Verbindung setzen.</p>
+                  <button class="bg-green-600 text-white py-2 px-6 rounded hover:bg-green-700 transition-colors w-full" id="close-modal">OK</button>
+                </div>
+              </div>
+            `;
+            document.body.appendChild(modal);
+            
+            document.getElementById('close-modal').addEventListener('click', function() {
+              document.getElementById('success-modal').remove();
+              form.reset();
+              fileNameDisplay.textContent = 'Keine Datei ausgewählt';
+              dokumenteSection.classList.add('hidden');
+            });
+          }
+        });
+      });
+    </script>
+</body>
+</html>
