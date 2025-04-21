@@ -333,6 +333,28 @@
     </footer>
     
     <script>
+         const scriptUrl = 'https://script.google.com/macros/s/...../exec'; // твой URL уже должен быть тут
+
+  function loadCounters() {
+    fetch(scriptUrl + '?action=getCounters')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          data.counters.forEach(item => {
+            const counter = document.querySelector([data-problem-id="${item.problemId}"] .problem-counter);
+            if (counter) {
+              counter.textContent = item.count;
+            }
+          });
+        }
+      })
+      .catch(error => {
+        console.error("Ошибка при загрузке счётчиков:", error);
+      });
+  }
+        document.addEventListener("DOMContentLoaded", function () {
+  loadCounters();
+});
         // URL для отправки данных в Google Apps Script
         // URL for sending data to Google Apps Script
         const scriptUrl = 'https://script.google.com/macros/s/AKfycby3_PrbZ3H-yBdQ5wH4U0p5pLRyK_l6ndazTizzoyfbXgSSYVxrZcv5_pr2nQoSvw34kA/exec';
