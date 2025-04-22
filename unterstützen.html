@@ -326,17 +326,7 @@
         </div>
         
         <div class="cards-container" id="cards-container">
-            <!-- Карточки будут загружены из скрипта -->
-            <!-- Cards will be loaded from script -->
-            <div class="card">
-                <div class="card-content">
-                    <h3>Daten werden geladen...</h3>
-                    <p class="card-description">Bitte warten Sie, während die Beschwerden geladen werden.</p>
-                    <div class="loading" style="display: block;">
-                        <div class="loading-spinner"></div>
-                    </div>
-                </div>
-            </div>
+            <!-- Hier werden die Karten sofort gerendert -->
         </div>
     </div>
     
@@ -373,12 +363,10 @@
     
       
     <script>
-        // URL для отправки данных в Google Apps Script
-        // URL for sending data to Google Apps Script
+        // URL für die Datenübertragung zu Google Apps Script
         const scriptUrl = 'https://script.google.com/macros/s/AKfycbz9JeaeRsUTFCTRBsjMaYzJeBNy30ncObjumLwH-f5QbKMOSZ4ZfchsgkT0TCiiPwb3Fw/exec';
         
-        // Массив с данными о проблемах
-        // Array with problem data
+        // Liste der Probleme/Beschwerden
         const problems = [
             {
                 id: 1,
@@ -424,8 +412,7 @@
             }
         ];
         
-        // Получаем элементы DOM
-        // Get DOM elements
+        // DOM-Elemente
         const modal = document.getElementById('support-modal');
         const supportForm = document.getElementById('support-form');
         const problemIdInput = document.getElementById('problem-id');
@@ -438,42 +425,16 @@
         const cancelBtn = document.getElementById('cancel-btn');
         const cardsContainer = document.getElementById('cards-container');
         
-        // Загрузка данных при загрузке страницы
-        // Load data when the page loads
+        // Ereignisbehandlung nach dem Laden der Seite
         document.addEventListener('DOMContentLoaded', function() {
-            fetchInitialData();
+            // Sofort alle Karten anzeigen
+            renderProblemCards();
+            
+            // Dann die aktuellen Zählerstände aus der Google Sheets-Tabelle laden
+            fetchCountersData();
         });
         
-        // Функция для загрузки начальных данных из Google Sheets
-        // Function to load initial data from Google Sheets
-        function fetchInitialData() {
-            fetch(scriptUrl + '?action=getCounters')
-                .then(response => response.json())
-                .then(data => {
-                    // Обновляем счетчики из загруженных данных
-                    // Update counters from loaded data
-                    if (data && data.counters) {
-                        data.counters.forEach(counter => {
-                            const problem = problems.find(p => p.id === parseInt(counter.problemId));
-                            if (problem) {
-                                problem.count = counter.count;
-                            }
-                        });
-                    }
-                    // Отображаем карточки с проблемами
-                    // Display problem cards
-                    renderProblemCards();
-                })
-                .catch(error => {
-                    console.error('Error loading initial data:', error);
-                    // В случае ошибки все равно отображаем карточки
-                    // Display cards even if there's an error
-                    renderProblemCards();
-                });
-        }
-        
-        // Функция для отображения карточек с проблемами
-        // Function to display problem cards
+        // Funktion zum Rendern aller Karten
         function renderProblemCards() {
             cardsContainer.innerHTML = '';
             
@@ -493,32 +454,53 @@
                 `;
                 cardsContainer.appendChild(card);
                 
-                // Добавляем обработчик события для кнопки поддержки
-                // Add event handler for support button
+                // Ereignisbehandlung für Support-Button
                 const supportBtn = card.querySelector('.support-btn');
                 supportBtn.addEventListener('click', function() {
                     const problemId = this.getAttribute('data-id');
                     const problemName = this.getAttribute('data-problem');
                     
-                    // Заполняем форму в модальном окне
-                    // Fill the form in the modal window
+                    // Modal vorbereiten
                     problemIdInput.value = problemId;
                     problemNameInput.value = problemName;
                     modalProblemName.textContent = `Problem: ${problemName}`;
                     
-                    // Сбрасываем состояние модального окна
-                    // Reset modal state
+                    // Modal-Status zurücksetzen
                     resetModalState();
                     
-                    // Отображаем модальное окно
-                    // Show the modal window
+                    // Modal anzeigen
                     modal.style.display = 'flex';
                 });
             });
         }
         
-        // Функция для сброса состояния модального окна
-        // Function to reset modal state
+        // Funktion zum Abrufen der Zählerdaten von Google Sheets
+        function fetchCountersData() {
+            // Anfrage an Google Apps Script zum Abrufen der Zähler
+            fetch(scriptUrl + '?action=getCounters')
+                .then(response => response.json())
+                .then(data => {
+                    // Zählerstände aktualisieren, wenn erfolgreich
+                    if (data && data.counters) {
+                        data.counters.forEach(counter => {
+                            const problem = problems.find(p => p.id === parseInt(counter.problemId));
+                            if (problem) {
+                                problem.count = counter.count;
+                                // Zählerstand in der UI aktualisieren
+                                const counterElement = document.getElementById(`counter-${problem.id}`);
+                                if (counterElement) {
+                                    counterElement.textContent = `${counter.count} Unterstützer`;
+                                }
+                            }
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Fehler beim Laden der Zählerdaten:', error);
+                });
+        }
+        
+        // Funktion zum Zurücksetzen des Modal-Status
         function resetModalState() {
             supportForm.reset();
             successMessage.style.display = 'none';
@@ -527,22 +509,19 @@
             submitBtn.disabled = false;
         }
         
-        // Обработчик для кнопки отмены
-        // Handler for the cancel button
+        // Ereignisbehandlung für Abbrechen-Button
         cancelBtn.addEventListener('click', function() {
             modal.style.display = 'none';
         });
         
-        // Закрытие модального окна при клике вне его содержимого
-        // Close the modal window when clicking outside its content
+        // Modal schließen, wenn außerhalb geklickt wird
         modal.addEventListener('click', function(event) {
             if (event.target === modal) {
                 modal.style.display = 'none';
             }
         });
         
-        // Обработчик отправки формы
-        // Form submission handler
+        // Formularverarbeitung
         supportForm.addEventListener('submit', function(event) {
             event.preventDefault();
             
@@ -550,21 +529,18 @@
             const problemName = problemNameInput.value;
             const email = document.getElementById('email').value;
             
-            // Отключаем кнопку отправки и показываем индикатор загрузки
-            // Disable submit button and show loading indicator
+            // Button deaktivieren und Ladeindikator anzeigen
             submitBtn.disabled = true;
             formLoading.style.display = 'block';
             
-            // Формируем данные для отправки
-            // Prepare data for sending
+            // Daten für die Übermittlung vorbereiten
             const formData = new FormData();
             formData.append('action', 'addSupport');
             formData.append('email', email);
             formData.append('problemId', problemId);
             formData.append('problemName', problemName);
             
-            // Отправляем данные в Google Sheets через Apps Script
-            // Send data to Google Sheets via Apps Script
+            // Daten an Google Sheets senden
             fetch(scriptUrl, {
                 method: 'POST',
                 body: formData
@@ -574,62 +550,35 @@
                 formLoading.style.display = 'none';
                 
                 if (data.success) {
-                    // Обновляем счетчик
-                    // Update counter
+                    // Zähler aktualisieren
                     const problem = problems.find(p => p.id === parseInt(problemId));
                     if (problem) {
                         problem.count = data.newCount || (problem.count + 1);
                         document.getElementById(`counter-${problemId}`).textContent = `${problem.count} Unterstützer`;
                     }
                     
-                    // Показываем сообщение об успехе
-                    // Show success message
+                    // Erfolgsmeldung anzeigen
                     successMessage.style.display = 'block';
                     
-                    // Закрываем модальное окно через некоторое время
-                    // Close the modal after some time
+                    // Modal nach kurzer Zeit schließen
                     setTimeout(() => {
                         modal.style.display = 'none';
                         resetModalState();
                     }, 3000);
                 } else {
-                    // Показываем сообщение об ошибке
-                    // Show error message
+                    // Fehlermeldung anzeigen
                     errorMessage.style.display = 'block';
                     submitBtn.disabled = false;
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
+                console.error('Fehler:', error);
                 formLoading.style.display = 'none';
                 errorMessage.style.display = 'block';
                 submitBtn.disabled = false;
             });
         });
-    
-
-function loadCounters() {
-  fetch(scriptUrl + '?action=getCounters')
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        data.counters.forEach(item => {
-          const el = document.querySelector(`.problem[data-problem-id="${item.problemId}"] .counter`);
-          if (el) {
-            el.textContent = item.count;
-          }
-        });
-      }
-    })
-    .catch(err => {
-      console.error("Fehler beim Laden der Zähler", err);
-    });
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-  loadCounters();
-});
-</script>
+    </script>
     <footer class="footer">
         <div class="footer-links">
             <a href="/">Startseite</a>
