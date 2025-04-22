@@ -2,11 +2,14 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://g-firma.com/</loc>
-    <priority>1.00</priority>
-  </url>
-  <url>
-    <loc>https://g-firma.com/legal</loc>
     <priority>0.80</priority>
   </url>
-  <!-- Добавь другие страницы, если они есть -->
+  <url>
+    <loc>https://g-firma.com/impressum</loc>
+    <priority>0.10</priority>
+  </url>
+   <url>
+    <loc>https://g-firma.com/unterstuetzen</loc>
+    <priority>1.00</priority>
+  </url>
 </urlset>
