@@ -3,6 +3,6 @@
     { "source": "/about", "destination": "/about.html" },
     { "source": "/contact", "destination": "/contact.html" },
     { "source": "/impressum", "destination": "/impressum.html" },
-    { "source": "/unterstützen", "destination": "/unterstützen.html" }
+    { "source": "/unterstuetzen", "destination": "/unterstützen.html" }
   ]
 }
